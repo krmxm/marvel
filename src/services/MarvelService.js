@@ -11,22 +11,23 @@ class MarvelService {
         return await res.json();
     }
 
-    getAllCharacters = () => {
-        return this.getResource(`${this._apiBase}characters?limit=9&offset=210&${this._apiKey}`); // возвращается promise
+    getAllCharacters = async () => {
+        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=210&${this._apiKey}`); // возвращается promise
+        return res.data.results.map(this._transformCharacter);
     }
 
-    getCharacter = async (id) => {
-        const res = await this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`); // возвращается promise
-        return this._transformCharacter(res);
+    getCharacter = async (id) => { // возвращается промис
+        const res = await this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`); // возвращается promise, и результат записывается в переменную
+        return this._transformCharacter(res.data.results[0]);
     }
 
-    _transformCharacter = (res) => {
+    _transformCharacter = (char) => {
         return {
-            name: res.data.results[0].name,
-                    description: res.data.results[0].description,
-                    thumbnail: res.data.results[0].thumbnail.path + '.' + res.data.results[0].thumbnail.extension,
-                    homepage: res.data.results[0].urls[0].url,
-                    wiki: res.data.results[0].urls[1].url
+            name: char.name,
+            description: char.description,
+            thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
+            homepage: char.urls[0].url,
+            wiki: char.urls[1].url
         }
     }
     
