@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import Spinner from '../spinner/Spinner';
+import ErrorMessage from '../errorMessage/ErrorMessage';
 import MarvelService from '../../services/MarvelService';
 
 
@@ -8,7 +9,9 @@ import './charList.scss';
 class CharList extends Component {
     
     state = {
-        charList: []
+        charList: [],
+        loading: true,
+        error: false
     }
     
     marvelService = new MarvelService();
@@ -16,10 +19,18 @@ class CharList extends Component {
     componentDidMount() {
         this.marvelService.getAllCharacters()
         .then(this.onCharListLoaded)
+        .catch(this.onError)
     }
 
     onCharListLoaded = (charList) => {
         this.setState({charList})
+    }
+
+    onError = () => {
+        this.setState({
+            loading: false,
+            error: true
+        })
     }
 
     renderItems = (array) => {
@@ -30,16 +41,25 @@ class CharList extends Component {
             )
         })
 
+        this.setState({
+            charList: array,
+            loading: false
+        })
+
         return newArr;
     }
     
     render() {
-        const {charList} = this.state;
-        const items = this.renderItems(charList)
+        const {charList, loading, error} = this.state;
+        const spinner = loading ? <Spinner/> : null;
+        const erroeMessage = error ? <ErrorMessage/> : null; 
+        const items = !(loading || error) ? this.renderItems(charList) : null;
 
         return (
             <div className="char__list">
                 <ul className="char__grid">
+                    {spinner}
+                    {erroeMessage}
                     {items}
                 </ul>
                 <button className="button button__main button__long">
@@ -50,34 +70,20 @@ class CharList extends Component {
     }
     }
 
-class CharItem extends Component {
-    constructor({name, thumbnail}){
-        super({name, thumbnail});
-        this.state = {
-            name: name,
-            loading: true,
-            thumbnail: thumbnail
-        }
-    }
-    render() {
-        const {name, thumbnail, loading} = this.state;
-        
-        let imgStyle = {'objectFit': 'cover'}
+const CharItem = ({name, thumbnail}) =>  {
+    
+    let imgStyle = {'objectFit': 'cover'}
         if(thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
             imgStyle = {'objectFit': 'contain'}
         }
 
-        const li =
-            <li className="char__item">
-                <img src={thumbnail} alt="abyss" style={imgStyle}/>
-                <div className="char__name">{name}</div>
-            </li>
-        const spinner = loading ? <Spinner/> : null;    
-        const content = !(name || thumbnail) ? spinner : li;
-        
-        console.log(thumbnail);
-        return content;
-    }
+    const li =
+        <li className="char__item">
+            <img src={thumbnail} alt="abyss" style={imgStyle}/>
+            <div className="char__name">{name}</div>
+        </li>
+    return li;
+    
 }
 
 
