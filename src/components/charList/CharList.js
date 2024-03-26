@@ -23,7 +23,10 @@ class CharList extends Component {
     }
 
     onCharListLoaded = (charList) => {
-        this.setState({charList})
+        this.setState({
+            charList,
+            loading: false
+        })
     }
 
     onError = () => {
@@ -33,35 +36,40 @@ class CharList extends Component {
         })
     }
 
+    handleItemClick = (id) => {
+        console.log(id);
+    }
+
     renderItems = (array) => {
         const newArr = array.map(item => {
             const {id, ...itemOptions} = item;
             return (
-                <CharItem key={id} {...itemOptions}/>
+                <CharItem key={id} id={id} {...itemOptions} onClick={this.handleItemClick}/>
             )
         })
 
-        this.setState({
-            charList: array,
-            loading: false
-        })
 
-        return newArr;
+        return (
+            <ul className='char__grid'>
+                    {newArr}
+            </ul>
+        );
     }
     
     render() {
         const {charList, loading, error} = this.state;
+
+        const items = this.renderItems(charList);
+
         const spinner = loading ? <Spinner/> : null;
         const erroeMessage = error ? <ErrorMessage/> : null; 
-        const items = !(loading || error) ? this.renderItems(charList) : null;
+        const content = !(loading || error) ? items : null;
 
         return (
             <div className="char__list">
-                <ul className="char__grid">
-                    {spinner}
-                    {erroeMessage}
-                    {items}
-                </ul>
+                {spinner}
+                {erroeMessage}
+                {content}
                 <button className="button button__main button__long">
                     <div className="inner">load more</div>
                 </button>
@@ -70,15 +78,19 @@ class CharList extends Component {
     }
     }
 
-const CharItem = ({name, thumbnail}) =>  {
+const CharItem = ({name, thumbnail, onClick, id}) =>  {
     
     let imgStyle = {'objectFit': 'cover'}
-        if(thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
-            imgStyle = {'objectFit': 'contain'}
-        }
+    if(thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
+        imgStyle = {'objectFit': 'contain'}
+    }
+
+    const handleClick = () => {
+        onClick(id);
+    }
 
     const li =
-        <li className="char__item">
+        <li className="char__item" onClick={handleClick}>
             <img src={thumbnail} alt="abyss" style={imgStyle}/>
             <div className="char__name">{name}</div>
         </li>
