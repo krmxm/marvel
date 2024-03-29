@@ -44,7 +44,7 @@ class CharList extends Component {
         const newArr = array.map(item => {
             const {id, ...itemOptions} = item;
             return (
-                <CharItem key={id} id={id} {...itemOptions} onClick={this.handleItemClick}/>
+                <CharItem key={id} id={id} {...itemOptions} onClick={this.props.onSelectedChar}/>
             )
         })
 
