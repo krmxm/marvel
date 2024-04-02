@@ -13,14 +13,39 @@ class CharList extends Component {
         loading: true,
         error: false,
         newCharLoading: false,
-        offset: 1546,
-        charEnded: false
+        offset: 210,
+        charEnded: false,
+        endPage: false
     }
     
     marvelService = new MarvelService();
 
     componentDidMount() {
         this.onRequest();
+
+        window.addEventListener('scroll', this.onCheckEndPage);
+        window.addEventListener('scroll', this.onCharListLoadByScroll);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.onCheckEndPage);
+        window.removeEventListener('scroll', this.onCharListLoadByScroll);
+    }
+
+    onCheckEndPage = () => {
+        if(window.scrollY + document.documentElement.clientHeight >= document.documentElement.offsetHeight) {
+            this.setState({
+                endPage: true
+            })
+        }
+    }
+
+    onCharListLoadByScroll = () => {
+        const {newCharLoading, charEnded, endPage, offset} = this.state;
+        if(!newCharLoading && !charEnded && endPage) {
+            this.onCharListLoading();
+            this.onRequest(offset)
+        }
     }
 
     onRequest = (offset) => {
@@ -44,7 +69,8 @@ class CharList extends Component {
             loading: false,
             newCharLoading: false,
             offset: offset + 9,
-            charEnded: ended
+            charEnded: ended,
+            endPage: false
         }))
     }
 
