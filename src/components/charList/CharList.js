@@ -1,4 +1,7 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
+
+
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import MarvelService from '../../services/MarvelService';
@@ -15,13 +18,24 @@ class CharList extends Component {
         newCharLoading: false,
         offset: 210,
         charEnded: false,
-        endPage: false
+        endPage: false,
+        limit: 9
     }
     
     marvelService = new MarvelService();
 
     componentDidMount() {
-        this.onRequest();
+        if(localStorage.getItem('limit')) { // если уже есть localstorage
+            let storage = JSON.parse(localStorage.getItem('limit'));
+            this.onRequest(this.state.offset, storage); // запрос с прошлым отступом от offset
+            this.setState(({offset, limit}) => ({
+                offset: (offset - limit) + storage
+            }))
+        } else {
+            this.onRequest();
+        }
+
+        
 
         window.addEventListener('scroll', this.onCheckEndPage);
         window.addEventListener('scroll', this.onCharListLoadByScroll);
@@ -48,9 +62,9 @@ class CharList extends Component {
         }
     }
 
-    onRequest = (offset) => {
+    onRequest = (offset, limit) => {
         this.onCharListLoading();
-        this.marvelService.getAllCharacters(offset)
+        this.marvelService.getAllCharacters(offset, limit)
         .then(this.onCharListLoaded)
         .catch(this.onError);
     }
@@ -64,13 +78,18 @@ class CharList extends Component {
     onCharListLoaded = (newCharList) => {
         let ended = this.marvelService._totalCharacters - this.state.offset <= 9;
 
-        this.setState(({offset, charList}) => ({
+        if(this.state.limit !== 9) {
+            localStorage.setItem('limit', JSON.stringify(this.state.limit)) // если не первая заргузка страницы, то storage обновляется на новое значение
+        }
+
+        this.setState(({offset, charList, limit}) => ({
             charList: [...charList, ...newCharList],
             loading: false,
             newCharLoading: false,
             offset: offset + 9,
             charEnded: ended,
-            endPage: false
+            endPage: false,
+            limit: limit + 9
         }))
     }
 
@@ -145,6 +164,10 @@ const CharItem = ({name, thumbnail, onClick, id}) =>  {
         </li>
     return li;
     
+}
+
+CharList.propType = {
+    onSelectedChar: PropTypes.func
 }
 
 
