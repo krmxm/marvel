@@ -1,6 +1,6 @@
 class MarvelService {
-    _apiBase = `https://gateway.marvel.com:443/v1/public/`;
-    _apiKey = `apikey=b551544aac7016713364f53da31486f5`;
+    _apiBase = `https://marvel-server-zeta.vercel.app/`;
+    _apiKey = `apikey=d4eecb0c66dedbfae4eab45d312fc1df`;
     _baseOffset = 210;
     _totalCharacters = 0;
     _baseLimit = 9;
